@@ -39,6 +39,8 @@ All tasks may take ~5 minutes.
 
 Finally, you can access Jenkins installation page through http://GCE_IP:30007
 
+It's not just for Jenkins, you can also use your own web service with the same configurations.
+
 <img src="https://github.com/DenizParlak/jenkinsops/blob/master/jen1.png" width="700">
 <img src="https://github.com/DenizParlak/jenkinsops/blob/master/jen2.png" width="700">
 
