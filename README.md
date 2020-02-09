@@ -20,6 +20,8 @@ Terraform will create a GCE with these specifications:
 
 After that, Terraform will trigger the Ansible playbook in the GCE instance. This playbook contains all tasks to setup the Kubernetes cluster via kubeadm with Docker.
 
+Some varibles pre-defined such as region, region-zone and project.
+
 Kubernetes section separated as three component:
 
 - Persistent Volume / Persistent Volume Claim
