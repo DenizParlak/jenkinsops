@@ -52,8 +52,8 @@ nat_ip = "${google_compute_address.test-static-ip-address.address}"
     }
   
 provisioner "file" {
-    source      = "/Users/deniz/terraform/ans.yaml"
-    destination = "/tmp/ans.yaml"
+    source      = "/Users/deniz/terraform/ansible.yaml"
+    destination = "/tmp/ansible.yaml"
   }
 
 provisioner "file" {
