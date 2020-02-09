@@ -4,7 +4,6 @@ provider "google" {
   zone    = "${var.region_zone}"
 }
 
-
 resource "google_compute_network" "vpc_network" {
   
   name                    = "jenkins-network"
@@ -15,9 +14,6 @@ resource "google_compute_network" "vpc_network" {
 resource "google_compute_address" "test-static-ip-address" {
   name = "my-test-static-ip-address"
 }
-
-
-
 
 resource "google_compute_instance" "default" {
   
@@ -33,7 +29,6 @@ connection {
     user = "deniz"
     private_key = "${file("~/.ssh/google_compute_engine")}"
   }
-
 
   boot_disk {
     
@@ -80,8 +75,6 @@ provisioner "file" {
 
 }
 
-
-
 service_account {
     scopes = ["compute-ro", "storage-ro"]
   }
@@ -94,7 +87,7 @@ resource "google_compute_firewall" "jenkins" {
 
 allow {
 protocol = "tcp"
-ports = ["8080"]
+ports = ["30007"]
 }
 source_ranges = ["0.0.0.0/0"]
 target_tags = ["jenkins"]
