@@ -1,4 +1,4 @@
-# Jenkins deployment with Terraform - Docker - Kubernetes - Ansible - Google Cloud Platform
+# Jenkins deployment with Terraform - Docker - Kubernetes - Ansible on Google Cloud Platform
 
 This project deploys Jenkins using different applications in the SysOps ecosystem.
 
