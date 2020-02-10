@@ -1,7 +1,9 @@
 provider "google" {
+  
   project = "${var.project}"
   region  = "${var.region}"
   zone    = "${var.region_zone}"
+  
 }
 
 resource "google_compute_network" "vpc_network" {
@@ -11,8 +13,8 @@ resource "google_compute_network" "vpc_network" {
 }
 
 
-resource "google_compute_address" "test-static-ip-address" {
-  name = "my-test-static-ip-address"
+resource "google_compute_address" "static-ip-address" {
+  name = "test-static-ip-address"
 }
 
 resource "google_compute_instance" "default" {
@@ -24,10 +26,12 @@ resource "google_compute_instance" "default" {
   tags = ["kubernetes", "jenkins"]
 
 connection {
-    host = "${google_compute_address.test-static-ip-address.address}"
+  
+    host = "${google_compute_address.static-ip-address.address}"
     type = "ssh"
     user = "deniz"
     private_key = "${file("~/.ssh/google_compute_engine")}"
+ 
   }
 
   boot_disk {
@@ -86,11 +90,15 @@ resource "google_compute_firewall" "jenkins" {
   network = "jenkins-network"
 
 allow {
+  
 protocol = "tcp"
 ports = ["30007"]
+  
 }
+  
 source_ranges = ["0.0.0.0/0"]
 target_tags = ["jenkins"]
+  
 }
 
 
