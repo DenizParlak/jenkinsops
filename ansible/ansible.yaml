@@ -1,0 +1,124 @@
+---
+- hosts: 127.0.0.1
+  connection: local
+  become: yes
+  tasks:
+
+    - name: disable SELinux
+      command: setenforce 0
+
+    - name: yum update
+      yum: name=* state=latest
+
+    - name: disable swap
+      shell: swapoff -a
+
+    - name: disable firewall
+      systemd:
+        name: firewalld
+        state: stopped
+
+    - name: install necessary packages 4 docker
+      yum:
+        name: "{{ packages }}"
+      vars:
+        packages:
+        - device-mapper-persistent-data
+        - yum-utils
+        - lvm2
+
+    - name: configure docker-ce-repo
+      command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+    - name: install docker-ce
+      yum: name=docker-ce state=latest
+
+    - name: start docker service
+      systemd:
+        name: docker
+        state: restarted
+
+    - name: add kubernetes repo
+      copy:
+        dest: /etc/yum.repos.d/kubernetes.repo
+        content: |
+          [kubernetes]
+          name=Kubernetes
+          baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+          enabled=1
+          gpgcheck=1
+          repo_gpgcheck=1
+          gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+    - name: install necessary packages
+      yum:
+        name: "{{ packages }}"
+      vars:
+        packages:
+        - kubelet
+        - kubeadm
+        - kubectl
+        - wget
+        - unzip
+
+    - name: daemon-reload
+      systemd:
+        state: restarted
+        daemon_reload: yes
+        name: kubelet
+
+    - name: restart kubelet
+      systemd:
+        state: restarted
+        name: kubelet
+
+    - name: enable kubelet
+      systemd:
+        name: kubelet
+        enabled: yes
+
+    - name: enable nf-call-iptables as 1
+      sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: 1
+        state: present
+        reload: yes
+
+    - name: enable ipv4 forwarding
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        sysctl_set: yes
+        state: present
+        reload: yes
+
+    - name: kubeadm init with flannel
+      shell: kubeadm init --pod-network-cidr=10.244.0.0/16
+
+    - name: create .kube
+      file:
+         path: $HOME/.kube
+         state: directory
+         mode: '0755'
+    - name: copy admin.conf file
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: $HOME/.kube/config
+        remote_src: yes
+
+    - name: apply pod network
+      shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/2140ac876ef134e0ed5af15c65e414cf26827915/Documentation/kube-flannel.yml
+
+    - name: schedule pods on control-plane node
+      shell: kubectl taint nodes --all node-role.kubernetes.io/master-
+
+    - name: add terraform user
+      user:
+        name: terraform 
+    
+    - name: apply kubernetes yamls
+      shell: "kubectl create -f {{ item }}"  
+      with_items:
+      - /tmp/persistentv.yaml
+      - /tmp/deploy.yaml
+      - /tmp/service.yaml
